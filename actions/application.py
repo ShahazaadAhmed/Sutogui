@@ -1,12 +1,46 @@
+import os
 import subprocess
 from .base import Action
 
 
-APPLICATIONS = {
-    "chrome": "chrome.exe",
-    "notepad": "notepad.exe",
-    "calculator": "calc.exe",
+APPLICATION_PATHS = {
+    "chrome": [
+        os.path.expandvars(
+            r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"
+        ),
+        os.path.expandvars(
+            r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"
+        ),
+        os.path.expandvars(
+            r"%LocalAppData%\Google\Chrome\Application\chrome.exe"
+        ),
+    ],
+
+    "notepad": [
+        r"C:\Windows\System32\notepad.exe"
+    ],
+
+    "calculator": [
+        r"C:\Windows\System32\calc.exe"
+    ],
 }
+
+
+def find_executable(application):
+    paths = APPLICATION_PATHS.get(application.lower())
+
+    if not paths:
+        raise ValueError(
+            f"Unsupported application: {application}"
+        )
+
+    for path in paths:
+        if path and os.path.isfile(path):
+            return path
+
+    raise FileNotFoundError(
+        f"Could not find {application} on this computer."
+    )
 
 
 class LaunchApplication(Action):
@@ -15,14 +49,9 @@ class LaunchApplication(Action):
         self.application = application.lower()
 
     def execute(self):
-        executable = APPLICATIONS.get(self.application)
+        executable = find_executable(self.application)
 
-        if not executable:
-            raise ValueError(
-                f"Unknown application: {self.application}"
-            )
-
-        subprocess.Popen(executable)
+        subprocess.Popen([executable])
 
         return {
             "success": True,
