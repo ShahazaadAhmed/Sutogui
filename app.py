@@ -2,16 +2,16 @@ from core.workflow import Workflow
 from core.executor import WorkflowExecutor
 
 from actions.application import LaunchApplication
-from actions.browser import OpenURL
 from actions.system import Wait
+from actions.windows import TypeText, Click
 
 
 def main():
 
-    workflow = Workflow("Open Gmail")
+    workflow = Workflow("Test Windows Automation")
 
     workflow.add_action(
-        LaunchApplication("chrome")
+        LaunchApplication("notepad")
     )
 
     workflow.add_action(
@@ -19,7 +19,18 @@ def main():
     )
 
     workflow.add_action(
-        OpenURL("https://mail.google.com")
+        TypeText(
+            "Notepad",
+            "TaskFlow click test"
+        )
+    )
+
+    workflow.add_action(
+        Click(
+            window_title="Notepad",
+            control_type="MenuItem",
+            control_title="File"
+        )
     )
 
     executor = WorkflowExecutor()

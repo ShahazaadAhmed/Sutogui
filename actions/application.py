@@ -15,11 +15,9 @@ APPLICATION_PATHS = {
             r"%LocalAppData%\Google\Chrome\Application\chrome.exe"
         ),
     ],
-
     "notepad": [
         r"C:\Windows\System32\notepad.exe"
     ],
-
     "calculator": [
         r"C:\Windows\System32\calc.exe"
     ],
@@ -39,7 +37,7 @@ def find_executable(application):
             return path
 
     raise FileNotFoundError(
-        f"Could not find {application} on this computer."
+        f"Could not find {application}."
     )
 
 
@@ -47,13 +45,17 @@ class LaunchApplication(Action):
 
     def __init__(self, application):
         self.application = application.lower()
+        self.process = None
 
     def execute(self):
         executable = find_executable(self.application)
 
-        subprocess.Popen([executable])
+        self.process = subprocess.Popen([executable])
 
         return {
             "success": True,
-            "message": f"{self.application} launched"
+            "message": (
+                f"{self.application} launched "
+                f"(PID: {self.process.pid})"
+            )
         }

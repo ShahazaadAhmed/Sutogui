@@ -1,5 +1,5 @@
-from pywinauto import Desktop
 from .base import Action
+from core.window_manager import WindowManager
 
 
 class TypeText(Action):
@@ -9,23 +9,65 @@ class TypeText(Action):
         self.text = text
 
     def execute(self):
-        desktop = Desktop(backend="uia")
 
-        window = desktop.window(
+        manager = WindowManager()
+
+        window = manager.wait_for_window(
             title_re=f".*{self.window_title}.*"
         )
 
-        window.wait("visible", timeout=10)
-
-        document = window.child_window(
+        document = manager.wait_for_control(
+            window,
             control_type="Document"
         )
 
-        document.wait("ready", timeout=10)
         document.set_focus()
-        document.set_edit_text(self.text)
+
+        document.type_keys(
+            self.text,
+            with_spaces=True,
+            pause=0.05
+        )
 
         return {
             "success": True,
-            "message": f"Typed text into {self.window_title}"
+            "message": (
+                f"Typed text into "
+                f"{self.window_title}"
+            )
+        }
+class Click(Action):
+
+    def __init__(
+        self,
+        window_title,
+        control_type=None,
+        control_title=None
+    ):
+        self.window_title = window_title
+        self.control_type = control_type
+        self.control_title = control_title
+
+    def execute(self):
+
+        manager = WindowManager()
+
+        window = manager.wait_for_window(
+            title_re=f".*{self.window_title}.*"
+        )
+
+        control = manager.wait_for_control(
+            window,
+            control_type=self.control_type,
+            title=self.control_title
+        )
+
+        control.click_input()
+
+        return {
+            "success": True,
+            "message": (
+                f"Clicked "
+                f"{self.control_title or self.control_type}"
+            )
         }
