@@ -1,6 +1,7 @@
 import os
 import subprocess
 from .base import Action
+from core.window_manager import WindowManager
 
 
 APPLICATION_PATHS = {
@@ -47,15 +48,16 @@ class LaunchApplication(Action):
         self.application = application.lower()
         self.process = None
 
-    def execute(self):
+    def execute(self, context):
+
         executable = find_executable(self.application)
-
-        self.process = subprocess.Popen([executable])
-
+        process = subprocess.Popen([executable])
+        context.set("active_pid", process.pid)
+        context.set("active_application", self.application)
         return {
             "success": True,
             "message": (
                 f"{self.application} launched "
-                f"(PID: {self.process.pid})"
+                f"(PID: {process.pid})"
             )
         }

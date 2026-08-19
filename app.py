@@ -3,33 +3,27 @@ from core.executor import WorkflowExecutor
 
 from actions.application import LaunchApplication
 from actions.system import Wait
-from actions.windows import TypeText, Click
+from actions.windows import Navigate
 
 
 def main():
 
-    workflow = Workflow("Test Windows Automation")
-
-    workflow.add_action(
-        LaunchApplication("notepad")
+    workflow = Workflow(
+        "Open Gmail"
     )
 
     workflow.add_action(
-        Wait(2)
+        LaunchApplication("chrome")
     )
 
     workflow.add_action(
-        TypeText(
-            "Notepad",
-            "TaskFlow click test"
-        )
+        Wait(3)
     )
 
     workflow.add_action(
-        Click(
-            window_title="Notepad",
-            control_type="MenuItem",
-            control_title="File"
+        Navigate(
+            "Chrome",
+            "https://mail.google.com"
         )
     )
 

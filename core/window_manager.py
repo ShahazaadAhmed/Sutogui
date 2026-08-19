@@ -6,73 +6,53 @@ class WindowManager:
     def __init__(self, backend="uia"):
         self.desktop = Desktop(backend=backend)
 
-    def find_window(self, title=None, title_re=None):
-        if title_re:
-            return self.desktop.window(
-                title_re=title_re
-            )
+    def get_window_handles(self):
+        return {
+            window.handle
+            for window in self.desktop.windows()
+        }
 
-        if title:
-            return self.desktop.window(
-                title=title
-            )
-
-        raise ValueError(
-            "Either title or title_re must be provided."
-        )
-
-    def wait_for_window(
+    def find_new_window(
         self,
-        title=None,
+        previous_handles,
         title_re=None,
-        timeout=10
+        timeout=15
     ):
-        window = self.find_window(
-            title=title,
-            title_re=title_re
+        import time
+
+        end_time = time.time() + timeout
+
+        while time.time() < end_time:
+
+            windows = self.desktop.windows()
+
+            for window in windows:
+
+                try:
+                    if window.handle in previous_handles:
+                        continue
+
+                    if title_re:
+                        title = window.window_text()
+
+                        if not __import__(
+                            "re"
+                        ).match(title_re, title):
+                            continue
+
+                    window.wait(
+                        "visible",
+                        timeout=2
+                    )
+
+                    return window
+
+                except Exception:
+                    continue
+
+            time.sleep(0.5)
+
+        raise RuntimeError(
+            "No new window appeared within "
+            f"{timeout} seconds."
         )
-
-        window.wait(
-            "visible",
-            timeout=timeout
-        )
-
-        return window
-
-    def find_control(
-        self,
-        window,
-        control_type=None,
-        title=None,
-        title_re=None
-    ):
-        criteria = {}
-
-        if control_type:
-            criteria["control_type"] = control_type
-
-        if title:
-            criteria["title"] = title
-
-        if title_re:
-            criteria["title_re"] = title_re
-
-        return window.child_window(**criteria)
-
-    def wait_for_control(
-        self,
-        window,
-        timeout=10,
-        **criteria
-    ):
-        control = self.find_control(
-            window,
-            **criteria
-        )
-
-        control.wait(
-            "ready",
-            timeout=timeout
-        )
-
-        return control

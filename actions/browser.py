@@ -7,7 +7,8 @@ class OpenURL(Action):
     def __init__(self, url):
         self.url = url
 
-    def execute(self):
+    def execute(self, context):
+
         webbrowser.open(self.url)
 
         return {

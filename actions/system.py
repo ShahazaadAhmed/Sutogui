@@ -7,7 +7,8 @@ class Wait(Action):
     def __init__(self, seconds):
         self.seconds = seconds
 
-    def execute(self):
+    def execute(self, context):
+
         time.sleep(self.seconds)
 
         return {
